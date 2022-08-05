@@ -20,9 +20,8 @@
 #include "model/model.h"
 #include "rele.h"
 #include "safety.h"
+#include "config/app_config.h"
 
-
-#define REG_COUNT 3
 
 static const char *TAG = "Minion";
 ModbusSlave        minion;
@@ -67,7 +66,7 @@ static const ModbusSlaveFunctionHandler custom_functions[] = {
 
     {EASYCONNECT_FUNCTION_CODE_CONFIG_ADDRESS, easyconnect_set_address_function},
     {EASYCONNECT_FUNCTION_CODE_RANDOM_SERIAL_NUMBER, easyconnect_send_address_function},
-    {EASYCONNECT_FUNCTION_CODE_NETWORK_INIZIALIZATION, initialization_function},
+    {EASYCONNECT_FUNCTION_CODE_NETWORK_INITIALIZATION, initialization_function},
     {EASYCONNECT_FUNCTION_CODE_SET_CLASS_OUTPUT, set_class_output},
 
     // Guard - prevents 0 array size
@@ -172,6 +171,12 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                     switch (args->index) {
                         case EASYCONNECT_HOLDING_REGISTER_ADDRESS:
                             result->value = ctx->get_address(ctx->arg);
+                            break;
+
+                        case EASYCONNECT_HOLDING_REGISTER_FIRMWARE_VERSION:
+                            result->value = EASYCONNECT_FIRMWARE_VERSION(APP_CONFIG_FIRMWARE_VERSION_MAJOR,
+                                                                         APP_CONFIG_FIRMWARE_VERSION_MINOR,
+                                                                         APP_CONFIG_FIRMWARE_VERSION_PATCH);
                             break;
 
                         case EASYCONNECT_HOLDING_REGISTER_CLASS:

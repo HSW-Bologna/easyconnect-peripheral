@@ -7,7 +7,7 @@
 
 #define EASYCONNECT_DEFAULT_MINION_ADDRESS       1
 #define EASYCONNECT_DEFAULT_MINION_SERIAL_NUMBER 2
-#define EASYCONNECT_DEFAULT_MINION_MODEL         0x0101
+#define EASYCONNECT_DEFAULT_DEVICE_CLASS         CLASS(DEVICE_MODE_LIGHT, DEVICE_GROUP_1)
 #define EASYCONNECT_DEFAULT_FEEDBACK_LEVEL       0x0
 #define EASYCONNECT_DEFAULT_ACTIVATE_ATTEMPTS    1
 #define EASYCONNECT_DEFAULT_FEEDBACK_DELAY       4
@@ -86,10 +86,11 @@ typedef struct {
 } model_t;
 
 
-void model_init(model_t *model);
+void     model_init(model_t *model);
+uint16_t model_get_class(void *arg);
+int      model_set_class(void *arg, uint16_t class, uint16_t *out_class);
 
 GETTERNSETTER_GENERIC(address, address);
-GETTERNSETTER_GENERIC(class, class);
 GETTERNSETTER_GENERIC(serial_number, serial_number);
 GETTERNSETTER(feedback_enabled, feedback_enabled);
 GETTERNSETTER(feedback_direction, feedback_direction);

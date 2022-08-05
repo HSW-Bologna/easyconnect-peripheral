@@ -149,7 +149,7 @@ static int on_waiting_fb_event_manager(model_t *pmodel, rele_event_t event) {
             if (digin_get(DIGIN_SIGNAL) == model_get_feedback_direction(pmodel)) {
                 attempts = 0;
                 return RELE_SM_STATE_ON;
-            } else if (attempts < model_get_output_attempts(pmodel)) {
+            } else if (attempts < model_get_output_attempts(pmodel) - 1) {
                 attempts++;
                 ESP_LOGI(TAG, "Feedback invalid, attempt %i", attempts);
                 heartbeat_signal(3);
@@ -190,7 +190,7 @@ static int off_event_manager(model_t *pmodel, rele_event_t event) {
                             return RELE_SM_STATE_ON;
                         }
                         break;
-                    
+
                     // Gas e Luci
                     default:
                         return RELE_SM_STATE_ON;
