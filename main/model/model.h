@@ -3,6 +3,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
+#include "easyconnect_interface.h"
 
 
 #define EASYCONNECT_DEFAULT_MINION_ADDRESS       1
@@ -78,6 +79,8 @@ typedef struct {
     uint16_t address;
     uint16_t class;
     uint16_t serial_number;
+    char     safety_message[EASYCONNECT_MESSAGE_SIZE + 1];
+    char     feedback_message[EASYCONNECT_MESSAGE_SIZE + 1];
 
     uint8_t feedback_enabled;
     uint8_t feedback_direction;
@@ -89,6 +92,10 @@ typedef struct {
 void     model_init(model_t *model);
 uint16_t model_get_class(void *arg);
 int      model_set_class(void *arg, uint16_t class, uint16_t *out_class);
+void     model_get_safety_message(void *args, char *string);
+void     model_set_safety_message(model_t *pmodel, const char *string);
+void     model_get_feedback_message(void *args, char *string);
+void     model_set_feedback_message(model_t *pmodel, const char *string);
 
 GETTERNSETTER_GENERIC(address, address);
 GETTERNSETTER_GENERIC(serial_number, serial_number);

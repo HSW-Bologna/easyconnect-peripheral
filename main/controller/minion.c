@@ -23,6 +23,10 @@
 #include "config/app_config.h"
 
 
+#define HOLDING_REGISTER_SAFETY_MESSAGE   EASYCONNECT_HOLDING_REGISTER_MESSAGE_1
+#define HOLDING_REGISTER_FEEDBACK_MESSAGE (HOLDING_REGISTER_SAFETY_MESSAGE + EASYCONNECT_MESSAGE_NUM_REGISTERS)
+
+
 static const char *TAG = "Minion";
 ModbusSlave        minion;
 
@@ -190,6 +194,23 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                         case EASYCONNECT_HOLDING_REGISTER_ALARMS:
                             result->value = !safety_ok();
                             break;
+
+                        case HOLDING_REGISTER_SAFETY_MESSAGE ... HOLDING_REGISTER_FEEDBACK_MESSAGE - 1: {
+                            char msg[EASYCONNECT_MESSAGE_SIZE + 1] = {0};
+                            model_get_safety_message(ctx->arg, msg);
+                            size_t i      = args->index - HOLDING_REGISTER_SAFETY_MESSAGE;
+                            result->value = msg[i * 2] << 8 | msg[i * 2 + 1];
+                            break;
+                        }
+
+                        case HOLDING_REGISTER_FEEDBACK_MESSAGE ... HOLDING_REGISTER_FEEDBACK_MESSAGE +
+                            EASYCONNECT_MESSAGE_NUM_REGISTERS - 1: {
+                            char msg[EASYCONNECT_MESSAGE_SIZE + 1] = {0};
+                            model_get_feedback_message(ctx->arg, msg);
+                            size_t i      = args->index - HOLDING_REGISTER_SAFETY_MESSAGE;
+                            result->value = msg[i] << 8 | msg[i];
+                            break;
+                        }
                     }
                     break;
                 }

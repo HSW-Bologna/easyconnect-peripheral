@@ -1,3 +1,4 @@
+#include <string.h>
 #include "model.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
@@ -24,6 +25,8 @@ void model_init(model_t *pmodel) {
     pmodel->feedback_direction = EASYCONNECT_DEFAULT_FEEDBACK_LEVEL;
     pmodel->output_attempts    = EASYCONNECT_DEFAULT_ACTIVATE_ATTEMPTS;
     pmodel->feedback_delay     = EASYCONNECT_DEFAULT_FEEDBACK_DELAY;
+
+    memset(pmodel->safety_message, 0, sizeof(pmodel->safety_message));
 }
 
 
@@ -56,6 +59,49 @@ int model_set_class(void *arg, uint16_t class, uint16_t *out_class) {
         return 0;
     } else {
         return -1;
+    }
+}
+
+
+void model_get_safety_message(void *args, char *string) {
+    model_t *pmodel = args;
+    xSemaphoreTake(pmodel->sem, portMAX_DELAY);
+    strcpy(string, pmodel->safety_message);
+    xSemaphoreGive(pmodel->sem);
+}
+
+
+void model_set_safety_message(model_t *pmodel, const char *string) {
+    xSemaphoreTake(pmodel->sem, portMAX_DELAY);
+    snprintf(pmodel->safety_message, sizeof(pmodel->safety_message), "%s", string);
+    xSemaphoreGive(pmodel->sem);
+}
+
+
+void model_get_feedback_message(void *args, char *string) {
+    model_t *pmodel = args;
+    xSemaphoreTake(pmodel->sem, portMAX_DELAY);
+    strcpy(string, pmodel->feedback_message);
+    xSemaphoreGive(pmodel->sem);
+}
+
+
+void model_set_feedback_message(model_t *pmodel, const char *string) {
+    xSemaphoreTake(pmodel->sem, portMAX_DELAY);
+    snprintf(pmodel->feedback_message, sizeof(pmodel->feedback_message), "%s", string);
+    xSemaphoreGive(pmodel->sem);
+}
+
+
+const char *model_default_safety_message(model_t *pmodel) {
+    switch (CLASS_GET_MODE(pmodel->class)) {
+        case DEVICE_MODE_LIGHT:
+            return "Warning: open door";
+
+        case DEVICE_MODE_UVC:
+
+        default:
+            return "ERROR";
     }
 }
 

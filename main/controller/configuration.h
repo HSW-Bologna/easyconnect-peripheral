@@ -14,6 +14,8 @@ void configuration_save_feedback_direction(void *args, uint8_t value);
 void configuration_save_activation_attempts(void *args, uint8_t value);
 void configuration_save_feedback_delay(void *args, uint8_t value);
 void configuration_save_feedback_enable(void *args, uint8_t value);
+void configuration_save_safety_message(void *args, const char *string);
+void configuration_save_feedback_message(void *args, const char *string);
 
 
 #endif
