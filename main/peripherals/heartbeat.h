@@ -5,15 +5,9 @@
 #include <stdlib.h>
 
 
-typedef enum {
-    HEARTBEAT_STATE_OK,
-    HEARTBEAT_STATE_KO,
-} heartbeat_state_t;
-
-
 void heartbeat_init(void);
-void heartbeat_set_state(heartbeat_state_t state);
-void heartbeat_signal(uint32_t new_blinks);
+void heartbeat_update_green(uint8_t value);
+void heartbeat_update_red(uint8_t value);
 
 
 #endif

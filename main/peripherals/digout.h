@@ -7,7 +7,6 @@
 
 typedef enum {
     DIGOUT_RELE = 0,
-    DIGOUT_LIGHT_SIGNAL,
 } digout_t;
 
 

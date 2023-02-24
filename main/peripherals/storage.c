@@ -60,6 +60,8 @@ int load_uint8_option(uint8_t *value, char *key) {
     if (err != ESP_OK && err != ESP_ERR_NVS_NOT_FOUND) {
         ESP_LOGE(TAG, "NVS error (%s) while reading %s", esp_err_to_name(err), key);
         return -1;
+    } else if (err == ESP_ERR_NVS_NOT_FOUND) {
+        return 1;
     }
 
     return 0;

@@ -26,6 +26,9 @@ void model_init(model_t *pmodel) {
     pmodel->output_attempts    = EASYCONNECT_DEFAULT_ACTIVATE_ATTEMPTS;
     pmodel->feedback_delay     = EASYCONNECT_DEFAULT_FEEDBACK_DELAY;
 
+    pmodel->output_attempts_exceeded = 0;
+    pmodel->missing_heartbeat        = 0;
+
     memset(pmodel->safety_message, 0, sizeof(pmodel->safety_message));
 }
 

@@ -45,7 +45,7 @@ void digin_init(void) {
 
     static StaticTimer_t timer_buffer;
     TimerHandle_t        timer =
-        xTimerCreateStatic("timerInput", pdMS_TO_TICKS(5), pdTRUE, NULL, periodic_read, &timer_buffer);
+        xTimerCreateStatic("timerInput", pdMS_TO_TICKS(10), pdTRUE, NULL, periodic_read, &timer_buffer);
     xTimerStart(timer, portMAX_DELAY);
 }
 
@@ -63,7 +63,7 @@ int digin_take_reading(void) {
     unsigned int input = 0;
     input |= !gpio_get_level(HAP_SAFETY);
     input |= (!gpio_get_level(HAP_SIGNAL)) << 1;
-    return debounce_filter(&filter, input, 10);
+    return debounce_filter(&filter, input, 5);
 }
 
 

@@ -19,6 +19,9 @@
 #define FEEDBACK_MESSAGE_KEY    "FEEDBACKMSG"
 
 
+static const char *TAG = "Config";
+
+
 void configuration_init(model_t *pmodel) {
     uint16_t value = 0;
 

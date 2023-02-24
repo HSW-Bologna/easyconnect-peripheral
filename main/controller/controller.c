@@ -18,6 +18,8 @@
 #include "device_commands.h"
 #include "safety.h"
 #include "rele.h"
+#include "leds_communication.h"
+#include "leds_activity.h"
 
 
 static void    console_task(void *args);
@@ -60,6 +62,10 @@ void controller_manage(model_t *pmodel) {
     if (digin_is_value_ready()) {
         rele_refresh(pmodel);
     }
+
+    heartbeat_update_green(leds_communication_manage(get_millis(), !model_get_missing_heartbeat(pmodel)));
+    heartbeat_update_red(
+        leds_activity_manage(get_millis(), !model_get_output_attempts_exceeded(pmodel), safety_ok(), rele_is_on()));
 }
 
 

@@ -9,7 +9,7 @@
 #define MB_UART_RXD GPIO_NUM_20
 #define MB_DERE     GPIO_NUM_7
 
-#define HAP_LED_RUN    GPIO_NUM_8
-#define HAP_LED_ACTIVE GPIO_NUM_9
+#define HAP_LED_ACTIVITY GPIO_NUM_8
+#define HAP_LED_COMM     GPIO_NUM_9
 
 #endif

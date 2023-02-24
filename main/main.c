@@ -13,6 +13,7 @@
 #include "peripherals/rs485.h"
 #include "peripherals/hardwareprofile.h"
 #include "easyconnect_interface.h"
+#include "event_log.h"
 
 
 static const char *TAG = "Main";
@@ -27,6 +28,7 @@ void app_main(void) {
     digin_init();
     digout_init();
     heartbeat_init();
+    event_log_init();
 
     model_init(&model);
     controller_init(&model);

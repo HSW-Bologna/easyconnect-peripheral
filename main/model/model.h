@@ -86,6 +86,9 @@ typedef struct {
     uint8_t feedback_direction;
     uint8_t output_attempts;
     uint8_t feedback_delay;
+    uint8_t missing_heartbeat;
+
+    uint8_t output_attempts_exceeded;
 } model_t;
 
 
@@ -99,9 +102,11 @@ void     model_set_feedback_message(model_t *pmodel, const char *string);
 
 GETTERNSETTER_GENERIC(address, address);
 GETTERNSETTER_GENERIC(serial_number, serial_number);
+GETTERNSETTER_GENERIC(missing_heartbeat, missing_heartbeat);
 GETTERNSETTER(feedback_enabled, feedback_enabled);
 GETTERNSETTER(feedback_direction, feedback_direction);
 GETTERNSETTER(output_attempts, output_attempts);
+GETTERNSETTER(output_attempts_exceeded, output_attempts_exceeded);
 GETTERNSETTER(feedback_delay, feedback_delay);
 
 #endif
