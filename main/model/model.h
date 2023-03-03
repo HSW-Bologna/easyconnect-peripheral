@@ -78,7 +78,7 @@ typedef struct {
 
     uint16_t address;
     uint16_t class;
-    uint16_t serial_number;
+    uint32_t serial_number;
     char     safety_message[EASYCONNECT_MESSAGE_SIZE + 1];
     char     feedback_message[EASYCONNECT_MESSAGE_SIZE + 1];
 

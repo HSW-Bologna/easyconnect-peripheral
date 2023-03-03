@@ -65,7 +65,7 @@ void controller_manage(model_t *pmodel) {
 
     heartbeat_update_green(leds_communication_manage(get_millis(), !model_get_missing_heartbeat(pmodel)));
     heartbeat_update_red(
-        leds_activity_manage(get_millis(), !model_get_output_attempts_exceeded(pmodel), safety_ok(), rele_is_on()));
+        leds_activity_manage(get_millis(), rele_is_on(), !model_get_output_attempts_exceeded(pmodel), safety_ok()));
 }
 
 

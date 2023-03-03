@@ -164,7 +164,8 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                     switch (args->index) {
                         case EASYCONNECT_HOLDING_REGISTER_ADDRESS:
                         case EASYCONNECT_HOLDING_REGISTER_CLASS:
-                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER:
+                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER_1:
+                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER_2:
                             break;
 
                         default:
@@ -203,8 +204,12 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                             result->value = ctx->get_class(ctx->arg);
                             break;
 
-                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER:
-                            result->value = ctx->get_serial_number(ctx->arg);
+                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER_1:
+                            result->value = (ctx->get_serial_number(ctx->arg) >> 16) & 0xFFFF;
+                            break;
+
+                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER_2:
+                            result->value = ctx->get_serial_number(ctx->arg) & 0xFFFF;
                             break;
 
                         case EASYCONNECT_HOLDING_REGISTER_ALARMS:
@@ -273,9 +278,16 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                         case EASYCONNECT_HOLDING_REGISTER_CLASS:
                             ctx->save_class(ctx->arg, args->value);
                             break;
-                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER:
-                            ctx->save_serial_number(ctx->arg, args->value);
+                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER_1: {
+                            uint32_t current_serial_number = ctx->get_serial_number(ctx->arg);
+                            ctx->save_serial_number(ctx->arg, (args->value << 16) | (current_serial_number & 0xFFFF));
                             break;
+                        }
+                        case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER_2: {
+                            uint32_t current_serial_number = ctx->get_serial_number(ctx->arg);
+                            ctx->save_serial_number(ctx->arg, args->value | (current_serial_number & 0xFFFF0000));
+                            break;
+                        }
                     }
                     break;
                 }
@@ -336,7 +348,7 @@ static LIGHTMODBUS_RET_ERROR set_class_output(ModbusSlave *minion, uint8_t funct
 static LIGHTMODBUS_RET_ERROR heartbeat_received(ModbusSlave *minion, uint8_t function, const uint8_t *requestPDU,
                                                 uint8_t requestLength) {
     easyconnect_interface_t *ctx = modbusSlaveGetUserPointer(minion);
-    ESP_LOGI(TAG, "Heartbeat");
+    ESP_LOGD(TAG, "Heartbeat");
 
     timestamp = get_millis();
     model_set_missing_heartbeat(ctx->arg, 0);
