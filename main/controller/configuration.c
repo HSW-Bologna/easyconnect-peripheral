@@ -17,6 +17,7 @@
 #define FEEDBACK_ENABLE_KEY     "FBENABLE"
 #define SAFETY_MESSAGE_KEY      "SAFETYMSG"
 #define FEEDBACK_MESSAGE_KEY    "FEEDBACKMSG"
+#define WORK_SECONDS_KEY        "WORKSECS"
 
 
 static const char *TAG = "Config";
@@ -30,6 +31,9 @@ void configuration_init(model_t *pmodel) {
         model_set_address(pmodel, value);
     }
     if (load_uint32_option(&value_32bit, SERIAL_NUM_KEY) == 0) {
+        model_set_serial_number(pmodel, value_32bit);
+    }
+    if (load_uint32_option(&value_32bit, WORK_SECONDS_KEY) == 0) {
         model_set_serial_number(pmodel, value_32bit);
     }
     if (load_uint16_option(&value, MODEL_KEY) == 0) {
@@ -55,6 +59,11 @@ void configuration_init(model_t *pmodel) {
     }
 
     ESP_LOGI(TAG, "Configuration initialized");
+}
+
+
+void configuration_save_work_seconds(uint32_t value) {
+    save_uint32_option(&value, WORK_SECONDS_KEY);
 }
 
 

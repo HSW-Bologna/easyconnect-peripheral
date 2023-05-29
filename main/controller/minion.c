@@ -32,6 +32,8 @@
 #define HOLDING_REGISTER_SAFETY_MESSAGE   EASYCONNECT_HOLDING_REGISTER_MESSAGE_1
 #define HOLDING_REGISTER_FEEDBACK_MESSAGE (HOLDING_REGISTER_SAFETY_MESSAGE + EASYCONNECT_MESSAGE_NUM_REGISTERS)
 
+#define HOLDING_REGISTER_WORK_HOURS EASYCONNECT_HOLDING_REGISTER_CUSTOM_START
+
 
 static const char   *TAG = "Minion";
 static ModbusSlave   minion;
@@ -98,7 +100,7 @@ void minion_init(easyconnect_interface_t *context) {
                           exception_callback,         // Callback for handling minion exceptions (optional)
                           modbusDefaultAllocator,     // Memory allocator for allocating responses
                           custom_functions,           // Set of supported functions
-                          13                          // Number of supported functions
+                          15                          // Number of supported functions
     );
 
     // Check for errors
@@ -166,6 +168,7 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                         case EASYCONNECT_HOLDING_REGISTER_CLASS:
                         case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER_1:
                         case EASYCONNECT_HOLDING_REGISTER_SERIAL_NUMBER_2:
+                        case HOLDING_REGISTER_WORK_HOURS:
                             break;
 
                         default:
@@ -221,6 +224,10 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                             }
                             break;
 
+                        case EASYCONNECT_HOLDING_REGISTER_STATE:
+                            result->value = rele_is_on();
+                            break;
+
                         case EASYCONNECT_HOLDING_REGISTER_LOGS_COUNTER:
                             result->value = event_log_get_count();
                             break;
@@ -253,6 +260,10 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                             result->value = msg[i] << 8 | msg[i];
                             break;
                         }
+
+                        case HOLDING_REGISTER_WORK_HOURS:
+                            result->value = model_get_work_hours(ctx->arg);
+                            break;
                     }
                     break;
                 }
@@ -288,6 +299,9 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                             ctx->save_serial_number(ctx->arg, args->value | (current_serial_number & 0xFFFF0000));
                             break;
                         }
+                        case HOLDING_REGISTER_WORK_HOURS:
+                            model_reset_work_seconds(ctx->arg);
+                            break;
                     }
                     break;
                 }

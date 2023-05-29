@@ -25,6 +25,8 @@ void model_init(model_t *pmodel) {
     pmodel->feedback_direction = EASYCONNECT_DEFAULT_FEEDBACK_LEVEL;
     pmodel->output_attempts    = EASYCONNECT_DEFAULT_ACTIVATE_ATTEMPTS;
     pmodel->feedback_delay     = EASYCONNECT_DEFAULT_FEEDBACK_DELAY;
+    pmodel->work_seconds       = 0;
+    pmodel->work_time_to_save  = 0;
 
     pmodel->output_attempts_exceeded = 0;
     pmodel->missing_heartbeat        = 0;
@@ -106,6 +108,33 @@ const char *model_default_safety_message(model_t *pmodel) {
         default:
             return "ERROR";
     }
+}
+
+
+void model_increase_work_seconds(model_t *pmodel, uint32_t seconds) {
+    if (seconds > 0) {
+        xSemaphoreTake(pmodel->sem, portMAX_DELAY);
+        pmodel->work_seconds += seconds;
+        pmodel->work_time_to_save = 1;
+        xSemaphoreGive(pmodel->sem);
+    }
+}
+
+
+void model_reset_work_seconds(model_t *pmodel) {
+    xSemaphoreTake(pmodel->sem, portMAX_DELAY);
+    pmodel->work_seconds      = 0;
+    pmodel->work_time_to_save = 1;
+    xSemaphoreGive(pmodel->sem);
+}
+
+
+uint16_t model_get_work_hours(model_t *pmodel) {
+    uint16_t result = 0;
+    xSemaphoreTake(pmodel->sem, portMAX_DELAY);
+    result = pmodel->work_seconds / (60UL * 60UL);
+    xSemaphoreGive(pmodel->sem);
+    return result;
 }
 
 

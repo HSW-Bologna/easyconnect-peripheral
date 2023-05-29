@@ -56,6 +56,8 @@ void controller_init(model_t *pmodel) {
 
 
 void controller_manage(model_t *pmodel) {
+    static unsigned long save_ts = 0;
+
     minion_manage();
     rele_manage(pmodel);
 
@@ -66,6 +68,17 @@ void controller_manage(model_t *pmodel) {
     heartbeat_update_green(leds_communication_manage(get_millis(), !model_get_missing_heartbeat(pmodel)));
     heartbeat_update_red(
         leds_activity_manage(get_millis(), rele_is_on(), !model_get_output_attempts_exceeded(pmodel), safety_ok()));
+
+    if (model_get_work_time_to_save(pmodel)) {
+        if (is_expired(save_ts, get_millis(), 1UL * 1000UL)) {
+            configuration_save_work_seconds(model_get_work_seconds(pmodel));
+            model_set_work_time_to_save(pmodel, 0);
+            ESP_LOGI(TAG, "Saving %i seconds", model_get_work_seconds(pmodel));
+            save_ts = get_millis();
+        }
+    } else {
+        save_ts = 0;
+    }
 }
 
 

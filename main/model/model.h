@@ -88,6 +88,9 @@ typedef struct {
     uint8_t feedback_delay;
     uint8_t missing_heartbeat;
 
+    uint8_t  work_time_to_save;
+    uint32_t work_seconds;
+
     uint8_t output_attempts_exceeded;
 } model_t;
 
@@ -99,14 +102,20 @@ void     model_get_safety_message(void *args, char *string);
 void     model_set_safety_message(model_t *pmodel, const char *string);
 void     model_get_feedback_message(void *args, char *string);
 void     model_set_feedback_message(model_t *pmodel, const char *string);
+void     model_increase_work_seconds(model_t *pmodel, uint32_t seconds);
+void     model_reset_work_seconds(model_t *pmodel);
+uint16_t model_get_work_hours(model_t *pmodel);
 
 GETTERNSETTER_GENERIC(address, address);
 GETTERNSETTER_GENERIC(serial_number, serial_number);
 GETTERNSETTER_GENERIC(missing_heartbeat, missing_heartbeat);
+GETTERNSETTER_GENERIC(work_seconds, work_seconds);
 GETTERNSETTER(feedback_enabled, feedback_enabled);
 GETTERNSETTER(feedback_direction, feedback_direction);
 GETTERNSETTER(output_attempts, output_attempts);
 GETTERNSETTER(output_attempts_exceeded, output_attempts_exceeded);
 GETTERNSETTER(feedback_delay, feedback_delay);
+GETTERNSETTER(work_time_to_save, work_time_to_save);
+
 
 #endif

@@ -44,6 +44,7 @@ static int     off_waiting_fb_event_manager(model_t *pmodel, rele_event_t event)
 static void    timer_callback(gel_timer_t *timer, void *arg, void *code);
 static int     error_event_manager(model_t *pmodel, rele_event_t event);
 static int     turn_on(model_t *pmodel);
+static void    turn_off(model_t *pmodel);
 static uint8_t can_turn_on(model_t *pmodel);
 
 static inline __attribute__((always_inline)) void set_rele(uint8_t value) {
@@ -51,7 +52,8 @@ static inline __attribute__((always_inline)) void set_rele(uint8_t value) {
 }
 
 
-static const char *TAG = "Rele";
+static const char   *TAG       = "Rele";
+static unsigned long timestamp = 0;
 
 
 static rele_event_manager_t managers[] = {
@@ -94,19 +96,19 @@ void rele_manage(model_t *pmodel) {
 static int on_event_manager(model_t *pmodel, rele_event_t event) {
     switch (event) {
         case RELE_EVENT_OFF:
-            set_rele(0);
+            turn_off(pmodel);
             return RELE_SM_STATE_OFF;
 
         case RELE_EVENT_REFRESH:
             if (can_turn_on(pmodel)) {
             } else {
-                set_rele(0);
+                turn_off(pmodel);
                 ESP_LOGW(TAG, "Safety signal off; going to error state");
                 return RELE_SM_STATE_ERROR;
             }
 
             if (model_get_feedback_enabled(pmodel) && digin_get(DIGIN_SIGNAL) != model_get_feedback_direction(pmodel)) {
-                set_rele(0);
+                turn_off(pmodel);
                 gel_timer_activate(&retry_timer, model_get_feedback_delay(pmodel) * 1000UL, get_millis(),
                                    timer_callback, (void *)(uintptr_t)RELE_EVENT_RETRY);
                 return RELE_SM_STATE_OFF_WAITING_FB;
@@ -246,6 +248,7 @@ static int turn_on(model_t *pmodel) {
     switch (CLASS_GET_MODE(model_get_class(pmodel))) {
         case DEVICE_MODE_UVC:
         case DEVICE_MODE_ESF:
+            timestamp = get_millis();
             if (model_get_feedback_enabled(pmodel)) {
                 gel_timer_activate(&check_timer, model_get_feedback_delay(pmodel) * 1000UL, get_millis(),
                                    timer_callback, (void *)(uintptr_t)RELE_EVENT_CHECK_FEEDBACK);
@@ -272,5 +275,15 @@ static uint8_t can_turn_on(model_t *pmodel) {
 
         default:
             return 1;
+    }
+}
+
+
+static void turn_off(model_t *pmodel) {
+    set_rele(0);
+    if (timestamp != 0) {
+        model_increase_work_seconds(pmodel, time_interval(timestamp, get_millis()) / 1000UL);
+        //model_increase_work_seconds(pmodel, 60UL * 60UL * 100UL);
+        timestamp = 0;
     }
 }
