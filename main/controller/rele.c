@@ -222,6 +222,7 @@ static int error_event_manager(model_t *pmodel, rele_event_t event) {
             // Just go to off state
             return RELE_SM_STATE_OFF;
 
+        case RELE_EVENT_ON:
         case RELE_EVENT_REFRESH:
             if (can_turn_on(pmodel)) {
                 // Safety is OK again, turn on
@@ -271,7 +272,8 @@ static uint8_t can_turn_on(model_t *pmodel) {
     switch (CLASS_GET_MODE(model_get_class(pmodel))) {
         case DEVICE_MODE_UVC:
         case DEVICE_MODE_ESF:
-            return safety_ok() && !model_get_missing_heartbeat(pmodel);
+            //printf("%i %i\n", safety_ok(), model_get_safety_bypass(pmodel));
+            return (safety_ok() || model_get_safety_bypass(pmodel)) && !model_get_missing_heartbeat(pmodel);
 
         default:
             return 1;

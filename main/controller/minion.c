@@ -34,6 +34,8 @@
 
 #define HOLDING_REGISTER_WORK_HOURS EASYCONNECT_HOLDING_REGISTER_CUSTOM_START
 
+#define COIL_RELE_STATE    0
+#define COIL_SAFETY_BYPASS 1
 
 static const char   *TAG = "Minion";
 static ModbusSlave   minion;
@@ -119,6 +121,7 @@ void minion_manage(void) {
     easyconnect_interface_t *context = modbusSlaveGetUserPointer(&minion);
 
     if (len > 0) {
+        //printf("Read %i bytes\n", len);
         // ESP_LOG_BUFFER_HEX(TAG, buffer, len);
 
         ModbusErrorInfo err;
@@ -127,6 +130,7 @@ void minion_manage(void) {
         if (modbusIsOk(err)) {
             size_t rlen = modbusSlaveGetResponseLength(&minion);
             if (rlen > 0) {
+                //printf("responding with %i bytes\n", rlen);
                 rs485_write((uint8_t *)modbusSlaveGetResponse(&minion), rlen);
             } else {
                 ESP_LOGD(TAG, "Empty response");
@@ -307,8 +311,21 @@ ModbusError register_callback(const ModbusSlave *status, const ModbusRegisterCal
                 }
 
                 case MODBUS_COIL:
-                    if (rele_update(ctx->arg, args->value)) {
-                        result->exceptionCode = MODBUS_EXCEP_SLAVE_FAILURE;
+                    switch (args->index) {
+                        case COIL_RELE_STATE:
+                            // printf("state coil %i\n", args->value);
+                            if (rele_update(ctx->arg, args->value)) {
+                                result->exceptionCode = MODBUS_EXCEP_SLAVE_FAILURE;
+                            }
+                            break;
+
+                        case COIL_SAFETY_BYPASS:
+                            model_set_safety_bypass(ctx->arg, args->value);
+                            // printf("coil %i\n", model_get_safety_bypass(ctx->arg));
+                            break;
+
+                        default:
+                            break;
                     }
                     break;
 
@@ -345,12 +362,15 @@ static LIGHTMODBUS_RET_ERROR initialization_function(ModbusSlave *minion, uint8_
 static LIGHTMODBUS_RET_ERROR set_class_output(ModbusSlave *minion, uint8_t function, const uint8_t *requestPDU,
                                               uint8_t requestLength) {
     // Check request length
-    if (requestLength < 3) {
+    if (requestLength < 4) {
         return modbusBuildException(minion, function, MODBUS_EXCEP_ILLEGAL_VALUE);
     }
 
     easyconnect_interface_t *ctx = modbusSlaveGetUserPointer(minion);
     uint16_t class               = requestPDU[1] << 8 | requestPDU[2];
+    uint8_t safety_bypass        = requestPDU[4];
+    model_set_safety_bypass(ctx->arg, safety_bypass);
+    // printf("class %i\n", safety_bypass);
     if (class == ctx->get_class(ctx->arg)) {
         rele_update(ctx->arg, requestPDU[3]);
     }

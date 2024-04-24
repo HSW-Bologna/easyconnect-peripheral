@@ -34,7 +34,7 @@ void configuration_init(model_t *pmodel) {
         model_set_serial_number(pmodel, value_32bit);
     }
     if (load_uint32_option(&value_32bit, WORK_SECONDS_KEY) == 0) {
-        model_set_serial_number(pmodel, value_32bit);
+        model_set_work_seconds(pmodel, value_32bit);
     }
     if (load_uint16_option(&value, MODEL_KEY) == 0) {
         model_set_class(pmodel, value, NULL);

@@ -145,7 +145,7 @@ int load_uint32_option(uint32_t *value, char *key) {
 
 void save_uint32_option(uint32_t *value, char *key) {
     nvs_handle_t handle;
-    ESP_LOGI(TAG, "Trying to save key %s", key);
+    ESP_LOGI(TAG, "Trying to save key %s with value", key, *value);
     assert(strlen(key) <= 15);
 
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &handle);

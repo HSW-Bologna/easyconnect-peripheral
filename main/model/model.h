@@ -92,6 +92,7 @@ typedef struct {
     uint32_t work_seconds;
 
     uint8_t output_attempts_exceeded;
+    uint8_t safety_bypass;
 } model_t;
 
 
@@ -116,6 +117,7 @@ GETTERNSETTER(output_attempts, output_attempts);
 GETTERNSETTER(output_attempts_exceeded, output_attempts_exceeded);
 GETTERNSETTER(feedback_delay, feedback_delay);
 GETTERNSETTER(work_time_to_save, work_time_to_save);
+GETTERNSETTER(safety_bypass, safety_bypass);
 
 
 #endif
