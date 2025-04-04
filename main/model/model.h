@@ -106,6 +106,7 @@ void     model_set_feedback_message(model_t *pmodel, const char *string);
 void     model_increase_work_seconds(model_t *pmodel, uint32_t seconds);
 void     model_reset_work_seconds(model_t *pmodel);
 uint16_t model_get_work_hours(model_t *pmodel);
+uint8_t  model_is_safety_mode(model_t *model);
 
 GETTERNSETTER_GENERIC(address, address);
 GETTERNSETTER_GENERIC(serial_number, serial_number);

@@ -121,8 +121,14 @@ void minion_manage(void) {
     easyconnect_interface_t *context = modbusSlaveGetUserPointer(&minion);
 
     if (len > 0) {
-        //printf("Read %i bytes\n", len);
-        // ESP_LOG_BUFFER_HEX(TAG, buffer, len);
+        /*
+        printf("Read %i bytes\n", len);
+        for (uint16_t i = 0; i < len;i++){ 
+            printf("0x%X ", buffer[i]);
+        }
+        printf("\n");
+        */
+        //ESP_LOG_BUFFER_HEX(TAG, buffer, len);
 
         ModbusErrorInfo err;
         err = modbusParseRequestRTU(&minion, context->get_address(context->arg), buffer, len);

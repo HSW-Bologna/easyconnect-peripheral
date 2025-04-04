@@ -101,17 +101,23 @@ static int on_event_manager(model_t *pmodel, rele_event_t event) {
 
         case RELE_EVENT_REFRESH:
             if (can_turn_on(pmodel)) {
+                if (model_is_safety_mode(pmodel)) {
+                    return turn_on(pmodel);
+                }
             } else {
                 turn_off(pmodel);
                 ESP_LOGW(TAG, "Safety signal off; going to error state");
                 return RELE_SM_STATE_ERROR;
             }
 
-            if (model_get_feedback_enabled(pmodel) && digin_get(DIGIN_SIGNAL) != model_get_feedback_direction(pmodel)) {
-                turn_off(pmodel);
-                gel_timer_activate(&retry_timer, model_get_feedback_delay(pmodel) * 1000UL, get_millis(),
-                                   timer_callback, (void *)(uintptr_t)RELE_EVENT_RETRY);
-                return RELE_SM_STATE_OFF_WAITING_FB;
+            if (!model_is_safety_mode(pmodel)) {
+                if (model_get_feedback_enabled(pmodel) &&
+                    digin_get(DIGIN_SIGNAL) != model_get_feedback_direction(pmodel)) {
+                    turn_off(pmodel);
+                    gel_timer_activate(&retry_timer, model_get_feedback_delay(pmodel) * 1000UL, get_millis(),
+                                       timer_callback, (void *)(uintptr_t)RELE_EVENT_RETRY);
+                    return RELE_SM_STATE_OFF_WAITING_FB;
+                }
             }
 
             return -1;
@@ -119,6 +125,8 @@ static int on_event_manager(model_t *pmodel, rele_event_t event) {
         default:
             return -1;
     }
+
+    return -1;
 }
 
 
@@ -179,6 +187,11 @@ static int off_event_manager(model_t *pmodel, rele_event_t event) {
                 } else {
                 }
             }
+
+            if (model_is_safety_mode(pmodel) && can_turn_on(pmodel)) {
+                return turn_on(pmodel);
+            }
+
             return -1;
 
         default:
@@ -247,6 +260,9 @@ static int turn_on(model_t *pmodel) {
     model_set_output_attempts_exceeded(pmodel, 0);
 
     switch (CLASS_GET_MODE(model_get_class(pmodel))) {
+        case DEVICE_MODE_SAFETY:
+            return RELE_SM_STATE_ON;
+
         case DEVICE_MODE_UVC:
         case DEVICE_MODE_ESF:
             timestamp = get_millis();
@@ -272,8 +288,10 @@ static uint8_t can_turn_on(model_t *pmodel) {
     switch (CLASS_GET_MODE(model_get_class(pmodel))) {
         case DEVICE_MODE_UVC:
         case DEVICE_MODE_ESF:
-            //printf("%i %i\n", safety_ok(), model_get_safety_bypass(pmodel));
+            // printf("%i %i\n", safety_ok(), model_get_safety_bypass(pmodel));
             return (safety_ok() || model_get_safety_bypass(pmodel)) && !model_get_missing_heartbeat(pmodel);
+        case DEVICE_MODE_SAFETY:
+            return safety_ok();
 
         default:
             return 1;
@@ -285,7 +303,7 @@ static void turn_off(model_t *pmodel) {
     set_rele(0);
     if (timestamp != 0) {
         model_increase_work_seconds(pmodel, time_interval(timestamp, get_millis()) / 1000UL);
-        //model_increase_work_seconds(pmodel, 60UL * 60UL * 100UL);
+        // model_increase_work_seconds(pmodel, 60UL * 60UL * 100UL);
         timestamp = 0;
     }
 }

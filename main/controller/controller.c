@@ -70,7 +70,7 @@ void controller_manage(model_t *pmodel) {
         leds_activity_manage(get_millis(), rele_is_on(), !model_get_output_attempts_exceeded(pmodel), safety_ok()));
 
     if (model_get_work_time_to_save(pmodel)) {
-        if (is_expired(save_ts, get_millis(), 1UL * 1000UL)) {
+        if (is_expired(save_ts, get_millis(), 60UL * 1000UL)) {
             configuration_save_work_seconds(model_get_work_seconds(pmodel));
             model_set_work_time_to_save(pmodel, 0);
             ESP_LOGI(TAG, "Saving %i seconds", model_get_work_seconds(pmodel));

@@ -139,12 +139,18 @@ uint16_t model_get_work_hours(model_t *pmodel) {
 }
 
 
+uint8_t model_is_safety_mode(model_t *model) {
+    return CLASS_GET_MODE(model->class) == DEVICE_MODE_SAFETY;
+}
+
+
 static uint8_t valid_mode(uint16_t mode) {
     switch (mode) {
         case DEVICE_MODE_LIGHT:
         case DEVICE_MODE_UVC:
         case DEVICE_MODE_ESF:
         case DEVICE_MODE_GAS:
+        case DEVICE_MODE_SAFETY:
             return 1;
         default:
             return 0;
